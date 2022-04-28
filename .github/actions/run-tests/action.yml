@@ -17,8 +17,10 @@ runs:
   using: "composite"
   steps:
     - name: Init submodules (since only the RTL is cached)
-      run: ./scripts/init-submodules-no-riscv-tools.sh --skip-validate
-      shell: bash
+      run: |
+        conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
+        ./scripts/init-submodules-no-riscv-tools.sh --skip-validate
+      shell: bash -leo pipefail {0}
 
     # Note: You shouldn't need the other inputs since it shouldn't build RTL from scratch
     - name: Build RTL
@@ -27,5 +29,7 @@ runs:
         group-key: ${{ inputs.group-key }}
 
     - name: Run RTL tests
-      run: ./.github/scripts/${{ inputs.run-script }} ${{ inputs.project-key }}
-      shell: bash
+      run: |
+        conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
+        ./.github/scripts/${{ inputs.run-script }} ${{ inputs.project-key }}
+      shell: bash -leo pipefail {0}

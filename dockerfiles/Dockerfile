@@ -2,33 +2,17 @@
 
 # BUILD BASE FOR CI
 
-FROM ubuntu:18.04 as base
+FROM continuumio/miniconda3 as base
 ARG CHIPYARD_HASH
 
 MAINTAINER https://groups.google.com/forum/#!forum/chipyard
-
-SHELL ["/bin/bash", "-c"] 
-
-# Install dependencies for ubuntu-req.sh
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-               curl \
-               git \
-               sudo \
-               ca-certificates \
-               keyboard-configuration \
-               console-setup \
-               bc \
-               unzip
 
 WORKDIR /root
 
 # Install Chipyard and run ubuntu-req.sh to install necessary dependencies
 RUN git clone https://github.com/ucb-bar/chipyard.git && \
         cd chipyard && \
-        git checkout $CHIPYARD_HASH && \
-        ./scripts/ubuntu-req.sh 1>/dev/null && \
-        sudo rm -rf /var/lib/apt/lists/*
+        git checkout $CHIPYARD_HASH
 
 # Update PATH for RISCV toolchain (note: hardcoded for CircleCI)
 ENV RISCV="/root/riscv-tools-install"
@@ -39,6 +23,10 @@ ENV PATH="$RISCV/bin:$PATH"
 
 # Use above build as base
 FROM base as base-with-tools
+
+RUN conda env create -f ./chipyard/scripts/conda-requirements.yaml
+
+SHELL ["conda", "run", "-n", "env", "/bin/bash", "-c"]
 
 # Init submodules
 RUN cd chipyard && \
@@ -66,7 +54,6 @@ RUN cd chipyard && \
         pip3 install -r python-requirements.txt && \
         marshal build br-base.json && \
         marshal clean br-base.json
-        
 
 # Run script to set environment variables on entry
 ENTRYPOINT ["chipyard/scripts/entrypoint.sh"]

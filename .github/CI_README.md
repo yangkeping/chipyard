@@ -117,6 +117,8 @@ After adding a private key, it will show a fingerprint that should be added unde
 
 Note: On the remote server you need to have the `*.pub` key file added to the `authorized_keys` file.
 
+Additionally, you need to install conda on the build servers that exist
+
 Notes on CIRCLE CI
 ------------------
 This code is heavily based on the origin [CircleCI]() work. There a quite a few differences

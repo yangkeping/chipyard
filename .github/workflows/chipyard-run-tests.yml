@@ -7,6 +7,10 @@ on:
       - main
       - '1.[0-9]*.x'
 
+defaults:
+  run:
+    shell: bash -leo pipefail {0}
+
 env:
   tools-cache-version: v14
   BUILDSERVER: ${{ secrets.BUILDSERVER }}
@@ -14,6 +18,8 @@ env:
   SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
   CI_DIR: ${{ secrets.BUILDDIR }}
   JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
+  conda-env-name-no-time: cy-${{ github.run_id }}
+  workflow-timestamp: ${{ github.event.pull_request.updated_at }}
 
 jobs:
   cancel-prior-workflows:
@@ -36,7 +42,9 @@ jobs:
       needs-rtl: ${{ steps.filter.outputs.all_count != steps.filter.outputs.skip-rtl_count }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - uses: dorny/paths-filter@v2
         id: filter
         with:
@@ -62,7 +70,7 @@ jobs:
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -72,9 +80,15 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
       - name: Check commits of each submodule
-        run: .github/scripts/check-commit.sh
+        run: |
+            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
+            .github/scripts/check-commit.sh
 
   tutorial-setup-check:
     name: tutorial-setup-check
@@ -82,7 +96,7 @@ jobs:
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -92,16 +106,22 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
       - name: Check that the tutorial-setup patches apply
-        run: scripts/tutorial-setup.sh
+        run: |
+            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
+            scripts/tutorial-setup.sh
 
   documentation-check:
     name: documentation-check
     needs: change-filters
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -111,12 +131,14 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
       - name: Check that documentation builds with no warnings/errors
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y python3-pip
-          sudo pip3 install -r docs/requirements.txt
+          conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
           make -C docs html
       - name: Show error log from sphinx if failed
         if: ${{ failure() }}
@@ -128,7 +150,7 @@ jobs:
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -138,7 +160,11 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
       - name: Build RISC-V toolchains
         uses: ./.github/actions/toolchain-build
 
@@ -148,7 +174,7 @@ jobs:
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -158,7 +184,11 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
       - name: Build RISC-V toolchains
         uses: ./.github/actions/toolchain-build
       - name: Generate keys
@@ -172,10 +202,12 @@ jobs:
           key: ${{ steps.genkey.outputs.extra-tests-cache-key }}
           restore-keys: ${{ steps.genkey.outputs.extra-tests-cache-key }}
       - name: Build extra tests
-        run: .github/scripts/build-extra-tests.sh
+        run: |
+            conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
+            .github/scripts/build-extra-tests.sh
 
-  install-verilator-knight:
-    name: install-verilator-knight
+  create-conda-env-knight:
+    name: create-conda-env-knight
     needs: [change-filters, cancel-prior-workflows]
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: knight
@@ -187,12 +219,16 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
-      - name: Build verilator on knight CI machine
-        run: .github/scripts/remote-install-verilator.sh
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Cleanup conda
+        uses: ./.github/actions/cleanup-conda
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
 
-  install-verilator-ferry:
-    name: install-verilator-ferry
+  create-conda-env-ferry:
+    name: create-conda-env-ferry
     needs: [change-filters, cancel-prior-workflows]
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: ferry
@@ -204,16 +240,20 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
-      - name: Build verilator on ferry CI machine
-        run: .github/scripts/remote-install-verilator.sh
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Cleanup conda
+        uses: ./.github/actions/cleanup-conda
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
 
   # Sentinel job to simplify how we specify which that basic setup is complete
   #
   # When adding new prep jobs, please add them to `needs` below
   setup-complete:
     name: setup-complete
-    needs: [install-toolchains, install-verilator-knight, install-verilator-ferry, build-extra-tests]
+    needs: [install-toolchains, create-conda-env-knight, create-conda-env-ferry, build-extra-tests]
     runs-on: ubuntu-latest
     steps:
       - name: Set up complete
@@ -233,7 +273,11 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
       - name: Build RTL on self-hosted
         uses: ./.github/actions/prepare-rtl
         with:
@@ -251,7 +295,11 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
       - name: Build RTL on self-hosted
         uses: ./.github/actions/prepare-rtl
         with:
@@ -269,7 +317,11 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
       - name: Build RTL on self-hosted
         uses: ./.github/actions/prepare-rtl
         with:
@@ -287,7 +339,11 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
       - name: Build RTL on self-hosted
         uses: ./.github/actions/prepare-rtl
         with:
@@ -305,7 +361,11 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
       - name: Build RTL on self-hosted
         uses: ./.github/actions/prepare-rtl
         with:
@@ -323,7 +383,11 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
       - name: Build RTL on self-hosted
         uses: ./.github/actions/prepare-rtl
         with:
@@ -337,7 +401,7 @@ jobs:
     needs: prepare-chipyard-cores
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -347,7 +411,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -359,7 +425,7 @@ jobs:
     needs: prepare-chipyard-cores
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -369,7 +435,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -381,7 +449,7 @@ jobs:
     needs: prepare-chipyard-cores
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -391,7 +459,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -403,7 +473,7 @@ jobs:
     needs: prepare-chipyard-cores
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -413,7 +483,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -425,7 +497,7 @@ jobs:
     needs: prepare-chipyard-cores
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -435,7 +507,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -447,7 +521,7 @@ jobs:
     needs: prepare-chipyard-cores
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -457,7 +531,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -469,7 +545,7 @@ jobs:
     needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -479,7 +555,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -491,7 +569,7 @@ jobs:
     needs: prepare-chipyard-peripherals
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -501,7 +579,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -513,7 +593,7 @@ jobs:
     needs: prepare-chipyard-peripherals
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -523,7 +603,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -535,7 +617,7 @@ jobs:
     needs: prepare-chipyard-peripherals
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -545,7 +627,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -557,7 +641,7 @@ jobs:
     needs: prepare-chipyard-peripherals
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -567,7 +651,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -579,7 +665,7 @@ jobs:
     needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -589,7 +675,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -601,7 +689,7 @@ jobs:
     needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -611,7 +699,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -623,7 +713,7 @@ jobs:
     needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -633,7 +723,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -645,7 +737,7 @@ jobs:
     needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -655,7 +747,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -667,7 +761,7 @@ jobs:
     needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -677,7 +771,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -689,7 +785,7 @@ jobs:
     needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -699,7 +795,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -711,7 +809,7 @@ jobs:
     needs: prepare-chipyard-tracegen
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -721,7 +819,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -733,7 +833,7 @@ jobs:
     needs: prepare-chipyard-tracegen
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -743,7 +843,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -755,7 +857,7 @@ jobs:
     needs: prepare-chipyard-other
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -765,7 +867,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -777,7 +881,7 @@ jobs:
     needs: prepare-chipyard-other
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:554b436
+      image: ucbbar/chipyard-ci-image:5a74e73
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -787,7 +891,9 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
       - name: Run tests
         uses: ./.github/actions/run-tests
         with:
@@ -807,7 +913,9 @@ jobs:
 #            rm -rf ${{ github.workspace }}/.* || true
 #            ls -alh .
 #      - name: Checkout
-#        uses: actions/checkout@v2
+#        uses: actions/checkout@v3
+#      - name: Git workaround
+#        uses: ./.github/actions/git-workaround
 #      - name: Run tests on self-hosted
 #        uses: ./.github/actions/run-tests
 #        with:
@@ -827,7 +935,11 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
       - name: Run tests on self-hosted
         uses: ./.github/actions/run-tests
         with:
@@ -847,7 +959,11 @@ jobs:
             rm -rf ${{ github.workspace }}/.* || true
             ls -alh .
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Git workaround
+        uses: ./.github/actions/git-workaround
+      - name: Create conda env
+        uses: ./.github/actions/create-conda-env
       - name: Run tests on self-hosted
         uses: ./.github/actions/run-tests
         with:

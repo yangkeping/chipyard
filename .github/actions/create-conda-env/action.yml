@@ -1,0 +1,15 @@
+name: create-conda-env
+description: 'Create conda env if it doesnt exist'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Create conda env.
+      run: |
+        if conda env list | grep -q "envs/${{ env.conda-env-name-no-time }}"; then
+          echo "Using pre-existing conda env. with prefix ${{ env.conda-env-name-no-time }}"
+        else
+          echo "Creating conda env."
+          conda env create -f ./scripts/conda-requirements.yaml -n ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
+        fi
+      shell: bash -leo pipefail {0}

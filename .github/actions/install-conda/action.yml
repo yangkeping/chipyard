@@ -1,0 +1,10 @@
+name: install-conda
+description: 'Install conda'
+
+runs:
+  using: "composite"
+  steps:
+    - name: (If doesn't exist) Install conda
+      run: |
+        ./scripts/install-conda.sh
+      shell: bash -leo pipefail {0}

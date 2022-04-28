@@ -8,8 +8,6 @@ REMOTE_MAKE_NPROC=4
 # verilator version
 VERILATOR_VERSION=v4.034
 
-HOME=$GITHUB_WORKSPACE
-
 # remote variables
 # CI_DIR is defined externally based on the GH repository secret BUILDDIR
 
@@ -27,10 +25,9 @@ REMOTE_SBT_OPTS="-Dsbt.ivy.home=$REMOTE_WORK_DIR/.ivy2 -Dsbt.supershell=false -D
 REMOTE_VERILATOR_DIR=$REMOTE_PREFIX-$GITHUB_SHA-verilator-install
 
 # local variables (aka within the docker container)
-LOCAL_CHECKOUT_DIR=$HOME/project
-LOCAL_RISCV_DIR=$HOME/riscv-tools-install
-LOCAL_ESP_DIR=$HOME/esp-tools-install
-LOCAL_CHIPYARD_DIR=$HOME
+LOCAL_RISCV_DIR=$GITHUB_WORKSPACE/riscv-tools-install
+LOCAL_ESP_DIR=$GITHUB_WORKSPACE/esp-tools-install
+LOCAL_CHIPYARD_DIR=$GITHUB_WORKSPACE
 LOCAL_SIM_DIR=$LOCAL_CHIPYARD_DIR/sims/verilator
 LOCAL_FIRESIM_DIR=$LOCAL_CHIPYARD_DIR/sims/firesim/sim
 
