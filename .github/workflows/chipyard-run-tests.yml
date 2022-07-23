@@ -70,7 +70,7 @@ jobs:
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -96,7 +96,7 @@ jobs:
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -121,7 +121,7 @@ jobs:
     needs: change-filters
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -150,7 +150,7 @@ jobs:
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -174,7 +174,7 @@ jobs:
     if: needs.change-filters.outputs.needs-rtl == 'true'
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -401,7 +401,7 @@ jobs:
     needs: prepare-chipyard-cores
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -425,7 +425,7 @@ jobs:
     needs: prepare-chipyard-cores
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -449,7 +449,7 @@ jobs:
     needs: prepare-chipyard-cores
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -473,7 +473,7 @@ jobs:
     needs: prepare-chipyard-cores
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -497,7 +497,7 @@ jobs:
     needs: prepare-chipyard-cores
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -521,7 +521,7 @@ jobs:
     needs: prepare-chipyard-cores
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -545,7 +545,7 @@ jobs:
     needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -569,7 +569,7 @@ jobs:
     needs: prepare-chipyard-peripherals
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -593,7 +593,7 @@ jobs:
     needs: prepare-chipyard-peripherals
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -617,7 +617,7 @@ jobs:
     needs: prepare-chipyard-peripherals
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -641,7 +641,7 @@ jobs:
     needs: prepare-chipyard-peripherals
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -665,7 +665,7 @@ jobs:
     needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -689,7 +689,7 @@ jobs:
     needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -713,7 +713,7 @@ jobs:
     needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -737,7 +737,7 @@ jobs:
     needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -761,7 +761,7 @@ jobs:
     needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -785,7 +785,7 @@ jobs:
     needs: prepare-chipyard-accels
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -809,7 +809,7 @@ jobs:
     needs: prepare-chipyard-tracegen
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -833,7 +833,7 @@ jobs:
     needs: prepare-chipyard-tracegen
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -857,7 +857,7 @@ jobs:
     needs: prepare-chipyard-other
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout
@@ -881,7 +881,7 @@ jobs:
     needs: prepare-chipyard-other
     runs-on: ubuntu-latest
     container:
-      image: ucbbar/chipyard-ci-image:5a74e73
+      image: ucbbar/chipyard-ci-image:dccef83
       options: --entrypoint /bin/bash
     steps:
       - name: Delete old checkout

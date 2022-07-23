@@ -26,12 +26,12 @@ FROM base as base-with-tools
 
 RUN conda env create -f ./chipyard/scripts/conda-requirements.yaml
 
-SHELL ["conda", "run", "-n", "env", "/bin/bash", "-c"]
+SHELL ["conda", "run", "-n", "chipyard", "/bin/bash", "-c"]
 
 # Init submodules
 RUN cd chipyard && \
         export MAKEFLAGS=-"j $(nproc)" && \
-        ./scripts/init-submodules-no-riscv-tools.sh 1>/dev/null
+        ./scripts/init-submodules-no-riscv-tools.sh --skip-validate 1>/dev/null
 
 # Install riscv-tools
 RUN cd chipyard && \
