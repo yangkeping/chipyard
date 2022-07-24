@@ -8,7 +8,7 @@ SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
 export RISCV="$GITHUB_WORKSPACE/riscv-tools-install"
-export LD_LIBRARY_PATH="$RISCV/lib"
+export LD_LIBRARY_PATH="$RISCV/lib:$LD_LIBRARY_PATH"
 export PATH="$RISCV/bin:$PATH"
 
 ls -alh $RISCV
