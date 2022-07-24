@@ -13,6 +13,8 @@ source $SCRIPT_DIR/defaults.sh
 if [ ! -d "$LOCAL_CHIPYARD_DIR/$1-install" ]; then
     cd $LOCAL_CHIPYARD_DIR
 
+    echo "How many cores $(nproc) compared to $CI_MAKE_NPROC"
+
     # init all submodules including the tools
     CHIPYARD_DIR="$LOCAL_CHIPYARD_DIR" NPROC=$CI_MAKE_NPROC $LOCAL_CHIPYARD_DIR/scripts/build-toolchains.sh $1
 

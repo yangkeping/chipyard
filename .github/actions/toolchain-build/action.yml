@@ -36,11 +36,11 @@ runs:
         path: riscv-tools-install
         key: riscv-tools-installed-${{ env.tools-cache-version }}-${{ steps.genkey.outputs.riscv-tools-cache-key }}
 
-    - name: Cache esp-tools
-      uses: actions/cache@v2
-      with:
-        path: esp-tools-install
-        key: esp-tools-installed-${{ env.tools-cache-version }}-${{ steps.genkey.outputs.esp-tools-cache-key }}
+          #    - name: Cache esp-tools
+          #      uses: actions/cache@v2
+          #      with:
+          #        path: esp-tools-install
+          #        key: esp-tools-installed-${{ env.tools-cache-version }}-${{ steps.genkey.outputs.esp-tools-cache-key }}
 
     - name: Build RISC-V toolchain if not cached
       run: |
@@ -48,8 +48,8 @@ runs:
         ./.github/scripts/build-toolchains.sh riscv-tools
       shell: bash -leo pipefail {0}
 
-    - name: Build ESP RISC-V toolchain if not cached
-      run: |
-        conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
-        ./.github/scripts/build-toolchains.sh esp-tools
-      shell: bash -leo pipefail {0}
+        #    - name: Build ESP RISC-V toolchain if not cached
+        #      run: |
+        #        conda activate ${{ env.conda-env-name-no-time }}-$(date --date "${{ env.workflow-timestamp }}" +%Y%m%d)
+        #        ./.github/scripts/build-toolchains.sh esp-tools
+        #      shell: bash -leo pipefail {0}

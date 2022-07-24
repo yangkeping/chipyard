@@ -101,21 +101,7 @@ To get the CI to work correctly you need to create the following GH Repository S
 
 | Secret | Value |
 | -------| ------------- |
-| BUILDSERVER | the hostname of the remote build server (likely be a millennium machine) |
-| BUILDUSER | the login to use on the build server |
 | BUILDDIR | the directory to use on the build server |
-| SERVERKEY | a private key to access the build server |
-
-The main workflow also constructs and places in the environment a SERVER and a work directyory on that server env using the above secrets.
-The SERVER is constructed like this:
-```bash
-SERVER = ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
-```
-
-Additionally, you need to add under the "PERMISSIONS" "SSH Permissions" section a private key that is on the build server that you are using.
-After adding a private key, it will show a fingerprint that should be added under the jobs that need to be run.
-
-Note: On the remote server you need to have the `*.pub` key file added to the `authorized_keys` file.
 
 Additionally, you need to install conda on the build servers that exist
 

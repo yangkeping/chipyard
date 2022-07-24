@@ -12,10 +12,7 @@ defaults:
     shell: bash -leo pipefail {0}
 
 env:
-  tools-cache-version: v14
-  BUILDSERVER: ${{ secrets.BUILDSERVER }}
-  BUILDUSER: ${{ secrets.BUILDUSER }}
-  SERVER: ${{ secrets.BUILDUSER }}@${{ secrets.BUILDSERVER }}
+  tools-cache-version: v15
   CI_DIR: ${{ secrets.BUILDDIR }}
   JVM_OPTS: -Xmx3200m # Customize the JVM maximum heap limit
   conda-env-name-no-time: cy-${{ github.run_id }}
