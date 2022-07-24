@@ -10,8 +10,8 @@ set -ex
 SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
 source $SCRIPT_DIR/defaults.sh
 
-if [ ! -d "$HOME/$1-install" ]; then
-    cd $HOME
+if [ ! -d "$LOCAL_CHIPYARD_DIR/$1-install" ]; then
+    cd $LOCAL_CHIPYARD_DIR
 
     # init all submodules including the tools
     CHIPYARD_DIR="$LOCAL_CHIPYARD_DIR" NPROC=$CI_MAKE_NPROC $LOCAL_CHIPYARD_DIR/scripts/build-toolchains.sh $1
