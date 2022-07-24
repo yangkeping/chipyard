@@ -15,6 +15,7 @@ ls -alh $RISCV
 ls -alh $RISCV/riscv64-unknown-elf/lib
 conda env list
 find $CONDA_PREFIX -name "libmpc.*"
+printenv
 
 echo 'int main(void) { return 0; }' | riscv64-unknown-elf-gcc -xc -specs=htif_nano.specs -o /dev/null -
 
