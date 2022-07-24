@@ -11,5 +11,8 @@ export RISCV="$GITHUB_WORKSPACE/riscv-tools-install"
 export LD_LIBRARY_PATH="$RISCV/lib"
 export PATH="$RISCV/bin:$PATH"
 
+ls -alh $RISCV
+ls -alh $RISCV/riscv64-unknown-elf/lib
+
 make -C $LOCAL_CHIPYARD_DIR/tests clean
 make -C $LOCAL_CHIPYARD_DIR/tests
